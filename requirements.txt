@@ -1,0 +1,9 @@
+torch==1.7.1
+pandas==1.4.1
+numpy==1.21.1
+tensorboard==2.4.0
+xlrd==2.0.1
+openpyxl==3.0.9
+torchtyping==0.1.4
+tensorboard==2.4.0
+tqdm==4.48.2
