@@ -8,6 +8,10 @@ from torchtyping import TensorType
 
 
 class PositionalEncoding(nn.Module):
+    """
+    Positional encoding in Transformer fashion:
+    with a use of goniometric functions
+    """
     def __init__(self, input_size: int, dropout: float = 0.1, max_len: int = 5000):
         super().__init__()
         self.dropout = nn.Dropout(p=dropout)
@@ -24,6 +28,10 @@ class PositionalEncoding(nn.Module):
 
 
 class LSTMModel(nn.Module):
+    """
+    LSTM model with embedding lookup table, positional encoding,
+    LSTM core and decoder which transforms LSTM outputs to predictions.
+    """
     def __init__(
         self,
         input_size: int,
@@ -41,6 +49,10 @@ class LSTMModel(nn.Module):
         self.hidden_size = hidden_size
 
     def init_hidden(self, batch_size: int) -> Tuple[TensorType]:
+        """
+        Hidden state of LSTM needs to be reinitialized after each batch, otherwise
+        it will contain informations from the sequences from the previous batch.
+        """
         hx = torch.zeros(self.num_layers, batch_size, self.hidden_size)
         cx = torch.zeros(self.num_layers, batch_size, self.hidden_size)
         return (hx, cx)
@@ -57,6 +69,11 @@ class LSTMModel(nn.Module):
 
 
 class TransformerModel(nn.Module):
+    """
+    Transformer model with embedding lookup table, positional encoding,
+    Transformer core and decoder which transforms LSTM outputs
+    to predictions.
+    """
     def __init__(
         self,
         input_size: int,
@@ -79,6 +96,11 @@ class TransformerModel(nn.Module):
         self.decoder = nn.Linear(hidden_size * seq_len, 1)
         
     def init_hidden(self, *args, **kwargs):
+        """
+        Here to be compatible with training module. Transformer does not
+        have hidden state in the same fashion as LSTM so reinitialization
+        is not needed.
+        """
         pass
 
     def forward(self, input: TensorType) -> TensorType:

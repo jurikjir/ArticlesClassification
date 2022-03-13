@@ -12,6 +12,11 @@ from model import LSTMModel, TransformerModel
 
 
 class Trainer(object):
+    """
+    Trainer takes care of defining all parts that are neede for the training,
+    hyperparameter setting, model selection, model training, model evaluation 
+    and results saving.
+    """
     def __init__(
             self,
             model: str,
@@ -67,6 +72,9 @@ class Trainer(object):
             patience=1)
 
     def train_model(self) -> None:
+        """
+        Training procedure of the model. 
+        """
         self.global_step = 0
         train_loss_d, train_acc_d, self.val_loss_d, self.val_acc_d = {}, {}, {}, {}
         for epoch in range(self.max_epochs):
@@ -103,6 +111,9 @@ class Trainer(object):
         self.writter.close()
 
     def evaluate_model(self, epoch: int) -> None:
+        """
+        Evaluation procedure of the model. No gradient is generated here.
+        """
         self.model.eval()
         total_loss = 0
         val_acc = 0
@@ -125,6 +136,10 @@ class Trainer(object):
             print(f'Epoch {epoch} Validation loss: {meaned_loss}')
 
     def binary_acc(self, model_output, target) -> float:
+        """
+        Calculates the binary accuracy from model prediction and target
+        in precents, this metrics determines the model performance.
+        """
         out_tag = torch.round(torch.sigmoid(model_output))
         correct_results_sum = (out_tag == target).sum().float()
         acc = correct_results_sum / target.shape[0]
@@ -132,6 +147,10 @@ class Trainer(object):
         return acc.item()
 
     def save_result_dict(self, results: Dict, res_name: str) -> None:
+        """
+        Saves the results from train and val procedure to dictionary
+        as a pickle file.
+        """
         results_folder = "results"
         if not os.path.isdir(results_folder):
             os.mkdir(results_folder)

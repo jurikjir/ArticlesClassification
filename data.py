@@ -15,7 +15,9 @@ from tqdm import tqdm
 
 class ArticlesDataModule(object):
     """
-    Data module which contains dataloaders for dataset 
+    Data module which contains dataloaders for dataset.
+    Module checks if vocabulary and translated dataset are present
+    in preprocessed folder. If they are not, this module creates them.
     """
 
     def __init__(self, data_root: str, columns: List[str], batch_size: int) -> None:
@@ -64,6 +66,11 @@ class ArticlesDataModule(object):
 
 
 class ArticlesDataLoader(DataLoader):
+    """
+    Inherit from torch DataLoader which gathers datasamples from dataset
+    to batches. Next passes through ntokens and seq_len variables which are
+    needed in training module. 
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -77,6 +84,10 @@ class ArticlesDataLoader(DataLoader):
 
 
 class ArticlesDataset(Dataset):
+    """
+    Dataset module for Articles, it takes care of dataset loading,
+    splitting and data sampling.
+    """
     def __init__(self, dataset_path: str, split: str) -> None:
         super().__init__()
         target_path = dataset_path.split("_")[0] + "_target.pt"
@@ -103,21 +114,34 @@ class ArticlesDataset(Dataset):
 
     @property
     def ntokens(self) -> int:
+        """
+        Needed for setting dimension of embedding tensor later in model
+        """
         return len(self.vocab)
 
     @property
     def seq_len(self):
+        """
+        Needed for setting dimension of decoder later in model
+        """
         return self.dataset.shape[1]
 
 
 class TextEncoder(object):
     def __init__(self, data_root: str, columns):
+        """
+        This module is responsible for vocabulary
+        creation and dataset translation
+        """
         self.data_root = data_root
         self.data_file = os.path.join(data_root, "Relevant vs Irrelevant.xlsx")
         self.processed_root = os.path.join(data_root, "processed")
         self.columns = columns
         self.data = pd.read_excel(self.data_file, engine="openpyxl")
         self.lang_tokens = list(self.data["language"].unique())
+        # special tokens which determines start of specific subpart of sequence
+        # for example maintext is bounded by: 
+        # <ms> and <me> which means <maintextstart> and <maintextend>
         self.special_tokens = {
             "language": ["<ls>", "<le>"],
             "title": ["<ts>", "<te>"],
@@ -127,6 +151,10 @@ class TextEncoder(object):
         }
 
     def convert_text(self, dataset_path: str) -> None:
+        """
+        Convert words string representation to numerical tokens 
+        with vocabulary mapping and save in torch tensor format.
+        """
         print("Converting dataset...")
         seqs = []
         self.all_columns = self.columns + ["language"]
@@ -155,6 +183,10 @@ class TextEncoder(object):
         print(f"Dataset successfully created and saved to {dataset_path}")
 
     def build_vocab(self, vocab_path: str) -> None:
+        """
+        Gather all unique words in datset and create vocabulary,
+        each unique word is mapped to unique number. Save vocabulary.
+        """
         column_values = []
         err_cnt = 0
         self.maxlens = {column: 0 for column in self.columns}
