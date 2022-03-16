@@ -8,6 +8,8 @@ Navigate to repository folder and install dependencies with:
 pip install -r requirements.txt        
 ```
 
+## Code structure
+
 1. train.py
 Entry point of the program. Contains training module for the models. Model parameters
 can be changed in trainer initialization:
