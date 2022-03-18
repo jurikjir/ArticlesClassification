@@ -31,7 +31,7 @@ It is also possible to inspect results with TensorBoard, navigate to repository 
 and exectue:
 
 ```
-tensorboard --logdir==runs    
+tensorboard --logdir runs    
 ```
 
 2. data.py Contains dataset text encoder, dataset, dataloader and datamodule
